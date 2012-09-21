@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-16"?>
+<PROG NAME="ZKULB001_MINES" VARCL="X" SUBC="1" APPL="*" CNAM="KULB001" CDAT="20120921" UNAM="KULB001" UDAT="20120921" VERN="000003" RSTAT="T" RMAND="100" RLOAD="D" FIXPT="X" SDATE="20120921" STIME="144719" IDATE="20120921" ITIME="144719" UCCHECK="X">
+ <textPool>
+  <language SPRAS="D">
+   <textElement ID="R" ENTRY="Mineswper" LENGTH="9 "/>
+  </language>
+ </textPool>
+ <programDocumentation/>
+ <source>** A minesweeper clone for the SAP R/3
+**
+** (c) 2000-2012 by Alexander Kulbartsch
+**
+** You may copy, use and distribute this programm as you like.
+**
+** Just upload this report and start it.
+** I intentionly did not use textelements, so this source is all you
+** need.
+**
+** This Prgramm works fine with SAP release 4.x.
+** I am not shure about the lowest release it will work with.
+**
+** Send any notes or remarks to Alexander@Kulbartsch.de
+**
+REPORT  ZKULB001_MINES.
+
+tables     sscrfields.
+include    &lt;icon&gt;.
+
+data:      t(100)       type c.        &quot; table (playground)
+data:      i            type i,        &quot; indexed position
+           j            type i,
+           x            type i,        &quot; x position
+           y            type i,        &quot; y position
+           xn(1)        type n,        &quot; x position
+           yn(1)        type n,        &quot; y position
+           v            type c,        &quot; value
+           b(5)         type c.        &quot; button
+
+data:      rema_n(2)    type n,        &quot; counter for remaining fields
+           bomb_n(2)    type n,        &quot; counter for hidden mines
+           fond_n(2)    type n.        &quot; counter for found mines
+
+data:      status(1)    type c.        &quot; status
+constants: stat_open    type c value &apos;O&apos;,
+           stat_lost    type c value &apos;L&apos;,
+           stat_won     type c value &apos;W&apos;,
+           stat_mark    type c value &apos;M&apos;.
+
+constants: k_mark(1)    type c value &apos;M&apos;.
+
+field-symbols: &lt;f&gt;, &lt;b&gt;.
+
+** selection screen
+
+selection-screen function key 1.
+selection-screen function key 2.
+selection-screen function key 3.
+selection-screen function key 4.
+selection-screen function key 5.
+
+selection-screen:
+
+  comment 1(50) msg0,
+
+  begin of block pg with frame,
+    begin of line,
+      pushbutton  2(2) b11 user-command b11,
+      pushbutton  5(2) b12 user-command b12,
+      pushbutton  8(2) b13 user-command b13,
+      pushbutton 11(2) b14 user-command b14,
+      pushbutton 14(2) b15 user-command b15,
+      pushbutton 17(2) b16 user-command b16,
+      pushbutton 20(2) b17 user-command b17,
+      pushbutton 23(2) b18 user-command b18,
+    end of line,
+    begin of line,
+      pushbutton  2(2) b21 user-command b21,
+      pushbutton  5(2) b22 user-command b22,
+      pushbutton  8(2) b23 user-command b23,
+      pushbutton 11(2) b24 user-command b24,
+      pushbutton 14(2) b25 user-command b25,
+      pushbutton 17(2) b26 user-command b26,
+      pushbutton 20(2) b27 user-command b27,
+      pushbutton 23(2) b28 user-command b28,
+    end of line,
+    begin of line,
+      pushbutton  2(2) b31 user-command b31,
+      pushbutton  5(2) b32 user-command b32,
+      pushbutton  8(2) b33 user-command b33,
+      pushbutton 11(2) b34 user-command b34,
+      pushbutton 14(2) b35 user-command b35,
+      pushbutton 17(2) b36 user-command b36,
+      pushbutton 20(2) b37 user-command b37,
+      pushbutton 23(2) b38 user-command b38,
+      comment   30(25) rema_txt,       &quot; Text: remaining bombs
+      comment    56(2) rema_cn,        &quot; counter numerical char
+    end of line,
+    begin of line,
+      pushbutton  2(2) b41 user-command b41,
+      pushbutton  5(2) b42 user-command b42,
+      pushbutton  8(2) b43 user-command b43,
+      pushbutton 11(2) b44 user-command b44,
+      pushbutton 14(2) b45 user-command b45,
+      pushbutton 17(2) b46 user-command b46,
+      pushbutton 20(2) b47 user-command b47,
+      pushbutton 23(2) b48 user-command b48,
+      comment   30(25) bomb_txt,       &quot; Text: hidden bombs
+      comment    56(2) bomb_cn,        &quot; counter numerical char
+    end of line,
+    begin of line,
+      pushbutton  2(2) b51 user-command b51,
+      pushbutton  5(2) b52 user-command b52,
+      pushbutton  8(2) b53 user-command b53,
+      pushbutton 11(2) b54 user-command b54,
+      pushbutton 14(2) b55 user-command b55,
+      pushbutton 17(2) b56 user-command b56,
+      pushbutton 20(2) b57 user-command b57,
+      pushbutton 23(2) b58 user-command b58,
+      comment   30(25) fond_txt,       &quot; Text: bombs found
+      comment    56(2) fond_cn,        &quot; counter numerical char
+    end of line,
+    begin of line,
+      pushbutton  2(2) b61 user-command b61,
+      pushbutton  5(2) b62 user-command b62,
+      pushbutton  8(2) b63 user-command b63,
+      pushbutton 11(2) b64 user-command b64,
+      pushbutton 14(2) b65 user-command b65,
+      pushbutton 17(2) b66 user-command b66,
+      pushbutton 20(2) b67 user-command b67,
+      pushbutton 23(2) b68 user-command b68,
+    end of line,
+    begin of line,
+      pushbutton  2(2) b71 user-command b71,
+      pushbutton  5(2) b72 user-command b72,
+      pushbutton  8(2) b73 user-command b73,
+      pushbutton 11(2) b74 user-command b74,
+      pushbutton 14(2) b75 user-command b75,
+      pushbutton 17(2) b76 user-command b76,
+      pushbutton 20(2) b77 user-command b77,
+      pushbutton 23(2) b78 user-command b78,
+    end of line,
+    begin of line,
+      pushbutton  2(2) b81 user-command b81,
+      pushbutton  5(2) b82 user-command b82,
+      pushbutton  8(2) b83 user-command b83,
+      pushbutton 11(2) b84 user-command b84,
+      pushbutton 14(2) b85 user-command b85,
+      pushbutton 17(2) b86 user-command b86,
+      pushbutton 20(2) b87 user-command b87,
+      pushbutton 23(2) b88 user-command b88,
+      pushbutton 40(30) link user-command link,
+    end of line,
+  end of block pg.
+
+
+** ********************************************************************
+
+initialization.
+
+**setting up buttons
+  sscrfields-functxt_01 = &apos;Mark Mine&apos;.
+  sscrfields-functxt_02 = &apos;Start level 1&apos;.
+  sscrfields-functxt_03 = &apos;Start level 2&apos;.
+  sscrfields-functxt_04 = &apos;Start level 3&apos;.
+  sscrfields-functxt_05 = &apos;Start level 4&apos;.
+  link = &apos;lgithub.com&apos;.
+
+  bomb_n   = 10.
+
+  perform init_play.
+
+
+** ********************************************************************
+
+at selection-screen.
+
+  case sscrfields-ucomm.
+    when &apos;FC02&apos;.                       &quot; startover with level 1
+      bomb_n  = 08.
+      perform init_play.
+      exit.
+    when &apos;FC03&apos;.                       &quot; startover with level 2
+      bomb_n  = 10.
+      perform init_play.
+      exit.
+    when &apos;FC04&apos;.                       &quot; startover with level 3
+      bomb_n  = 14.
+      perform init_play.
+      exit.
+    when &apos;FC05&apos;.                       &quot; startover with level 4
+      bomb_n  = 20.
+      perform init_play.
+      exit.
+    when &apos;LINK&apos;.                       &quot; call link
+      call function &apos;WS_EXECUTE&apos;
+         exporting
+           program    = &apos;http://www.github.com&apos;
+           document   = &apos;X&apos;
+         exceptions
+                prog_not_found = 1.
+      if sy-subrc &lt;&gt; 0.
+        msg0 = &apos;Sorry, couldn´t open http://www.github.com.&apos;.
+      endif.
+      exit.
+  endcase.
+  case status.
+    when stat_open.
+      perform check_field.
+    when stat_mark.
+      perform mark_field.
+  endcase.
+
+
+start-of-selection.
+
+** just restart
+
+
+**   step on a new field
+form check_field.
+  if sscrfields-ucomm = &apos;FC01&apos;.        &quot; next time look for a mine
+    status = stat_mark.
+    msg0 = &apos;Next mark a field ...&apos;.
+    exit.
+  endif.
+  perform open_field using sscrfields-ucomm.
+endform. &quot; check field
+
+
+**   open up a field
+form open_field using open.
+  if open+1(2) &lt; 11 or
+     open+1(2) &gt; 88.                   &quot; no button!
+    exit.
+  endif.
+  assign (open) to &lt;b&gt;.                &quot; assign button
+  i = open+1(2).                       &quot; get index from buttonname
+  if &lt;b&gt; &lt;&gt; space.                     &quot; button allready pushed
+    exit.
+  endif.
+  assign t+i(1) to &lt;f&gt;.                &quot; assign table field
+  &lt;b&gt; = &lt;f&gt;.
+  subtract 1 from rema_n.
+  rema_cn = rema_n.
+  if &lt;f&gt; = &apos;*&apos;.                        &quot; hit the mine
+    msg0 = &apos;Sorry, you stepped on a mine!&apos;.
+    status = stat_lost.
+    exit.
+  endif.
+  if rema_n = bomb_n.
+    msg0 = &apos;You cleared all possible fields, you win!&apos;.
+    status = stat_won.
+  else.                                &quot; clear area and continue
+    if &lt;f&gt; = &apos;0&apos;.
+      perform auto_clear using i.
+    endif.
+    msg0 = &apos;Field clear, next step on field ...&apos;.
+  endif.
+endform. &quot; open_field
+
+
+**   mark a field as mined
+form mark_field.
+  status = stat_open.                  &quot; next round open again.
+  if sscrfields-ucomm = &apos;FC01&apos;.        &quot; dont mark
+    msg0 = &apos;Nothing marked, next step on field ...&apos;.
+    exit.
+  endif.
+  assign (sscrfields-ucomm) to &lt;b&gt;.    &quot; assign button
+  if &lt;b&gt; = k_mark.                     &quot; allready marked.
+    &lt;b&gt; = space.                       &quot; so remove mark
+    subtract 1 from fond_n.
+    fond_cn = fond_n.
+    msg0 = &apos;Mark removed, next step on field ...&apos;.
+    exit.
+  endif.
+  if &lt;b&gt; &lt;&gt; space.                     &quot; button allready pushed
+    exit.
+  endif.
+  &lt;b&gt; = k_mark.                        &quot; mark this field
+  add 1 to fond_n.
+  fond_cn = fond_n.
+  msg0 = &apos;Mark set, next step on field ...&apos;.
+endform. &quot; mark_field
+
+
+**   initialize playground
+form init_play.
+
+**clearing playground
+  i = 0.
+  do 10 times.
+    t+i(10) = &apos;0000000000&apos;.
+    add 10 to i.
+  enddo.
+
+**clear the buttons
+  b(1)   = &apos;B&apos;.
+  xn = 1.
+  do 8 times.
+    b+1(1) = xn.
+    yn = 1.
+    do 8 times.
+      b+2(1) = yn.
+      assign (b) to &lt;b&gt;.               &quot; assign button
+      &lt;b&gt; = space.
+      add 1 to yn.
+    enddo.
+    add 1 to xn.
+  enddo.
+
+**hiding mines
+  do bomb_n times. &quot; number of mines
+    call function &apos;QF05_RANDOM_INTEGER&apos;
+         exporting
+              ran_int_min   = 1
+              ran_int_max   = 8
+         importing
+              ran_int       = x
+         exceptions
+              invalid_input = 1
+              others        = 2.
+    call function &apos;QF05_RANDOM_INTEGER&apos;
+         exporting
+              ran_int_min   = 1
+              ran_int_max   = 8
+         importing
+              ran_int       = y
+         exceptions
+              invalid_input = 1
+              others        = 2.
+    i = x + ( y * 10 ) . v = t+i(1) .
+    while v = &apos;*&apos;.                     &quot; position occupied ?
+      add 1 to x.                      &quot;  next field
+      if x = 9.                        &quot;  end of line ?
+        x = 1. add 1 to y.             &quot;   next line
+        if y = 9. y = 1. endif.        &quot;   last line =&gt; first line
+      endif.
+      i = x + ( y * 10 ) . v = t+i(1) .
+    endwhile.
+    t+i(1) = &apos;*&apos;.
+    perform inc_f using i -11.
+    perform inc_f using i -10.
+    perform inc_f using i -09.
+    perform inc_f using i -01.
+    perform inc_f using i   1.
+    perform inc_f using i   9.
+    perform inc_f using i  10.
+    perform inc_f using i  11.
+  enddo.
+
+**setting texts and scores
+           &quot;  1234567890123456789012345
+  rema_txt = &apos;       remaining fields :&apos;.
+  rema_n   = 64.
+  rema_cn  = rema_n.
+  bomb_txt = &apos;           mines hidden :&apos;.
+* bomb_n   = 10. &quot; number of bombs are set outside
+  bomb_cn  = bomb_n.
+  fond_txt = &apos;            mines found :&apos;.
+  fond_n   = 0.
+  fond_cn  = fond_n.
+
+  msg0 = &apos;Start, step on field.&apos;.
+  status   = stat_open.
+
+endform. &quot; init_play.
+
+
+**   increment field
+form inc_f using  p_i p_off.
+  j = p_i + p_off.
+  v = t+j(1).
+  if v &lt;&gt; &apos;*&apos;.
+    add 1 to v.  t+j(1) = v.           &quot; increment field value
+  endif.
+endform.                    &quot; INC_F
+
+
+**automatic clear all 0 areas and neighbours
+form auto_clear using ac_i.
+
+  data acb like b.
+  data aci like i.
+
+  aci      = i.
+  acb(1)   = &apos;B&apos;.
+
+  acb+1(2) = aci - 11.
+  perform open_field using acb.
+
+  acb+1(2) = aci - 10.
+  perform open_field using acb.
+
+  acb+1(2) = aci - 9.
+  perform open_field using acb.
+
+  acb+1(2) = aci - 1.
+  perform open_field using acb.
+
+  acb+1(2) = aci + 1.
+  perform open_field using acb.
+
+  acb+1(2) = aci + 9.
+  perform open_field using acb.
+
+  acb+1(2) = aci + 10.
+  perform open_field using acb.
+
+  acb+1(2) = aci + 11.
+  perform open_field using acb.
+
+endform.
+
+
+** EOF</source>
+</PROG>
