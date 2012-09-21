@@ -163,7 +163,7 @@ initialization.
   sscrfields-functxt_03 = &apos;Start level 2&apos;.
   sscrfields-functxt_04 = &apos;Start level 3&apos;.
   sscrfields-functxt_05 = &apos;Start level 4&apos;.
-  link = &apos;lgithub.com&apos;.
+  link = &apos;github.com&apos;.
 
   bomb_n   = 10.
 
