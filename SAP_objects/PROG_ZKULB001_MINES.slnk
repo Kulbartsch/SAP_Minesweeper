@@ -1,8 +1,45 @@
 <?xml version="1.0" encoding="utf-16"?>
-<PROG NAME="ZKULB001_MINES" VARCL="X" SUBC="1" APPL="*" CNAM="KULB001" CDAT="20120921" UNAM="KULB001" UDAT="20120921" VERN="000003" RSTAT="T" RMAND="100" RLOAD="D" FIXPT="X" SDATE="20120921" STIME="144719" IDATE="20120921" ITIME="144719" UCCHECK="X">
+<PROG NAME="ZKULB001_MINES" VARCL="X" SUBC="1" APPL="*"      RSTAT="T"  RLOAD="D" FIXPT="X"     UCCHECK="X">
  <textPool>
   <language SPRAS="D">
-   <textElement ID="R" ENTRY="Mineswper" LENGTH="9 "/>
+   <textElement ID="I" KEY="001" ENTRY="Mine markieren" LENGTH="14 "/>
+   <textElement ID="I" KEY="002" ENTRY="Starte Level 1" LENGTH="14 "/>
+   <textElement ID="I" KEY="003" ENTRY="Starte Level 2" LENGTH="14 "/>
+   <textElement ID="I" KEY="004" ENTRY="Starte Level 3" LENGTH="14 "/>
+   <textElement ID="I" KEY="005" ENTRY="Starte Level 4" LENGTH="14 "/>
+   <textElement ID="I" KEY="006" ENTRY="GitHub.com" LENGTH="30 "/>
+   <textElement ID="I" KEY="007" ENTRY="Schade, konnte GitHub.com nicht starten" LENGTH="50 "/>
+   <textElement ID="I" KEY="008" ENTRY="markiere ein Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="009" ENTRY="Verloren! Du bist auf eine Mine getreten." LENGTH="50 "/>
+   <textElement ID="I" KEY="010" ENTRY="Gewonnen! Du hast alle Felder aufgedeckt." LENGTH="50 "/>
+   <textElement ID="I" KEY="011" ENTRY="Feld frei, nächstes Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="012" ENTRY="Nichts markiert, klicke auf ein Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="013" ENTRY="Markierung entfernt, nächstes Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="014" ENTRY="Markierung gesetzt, nächstes Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="015" ENTRY="Start, klicke auf ein Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="016" ENTRY="    verbleibende Felder :" LENGTH="25 "/>
+   <textElement ID="I" KEY="017" ENTRY="        versteckte Minen:" LENGTH="25 "/>
+   <textElement ID="I" KEY="018" ENTRY="        gefundene Minen :" LENGTH="25 "/>
+  </language>
+  <language SPRAS="E">
+   <textElement ID="I" KEY="001" ENTRY="mark mine" LENGTH="14 "/>
+   <textElement ID="I" KEY="002" ENTRY="Starte Level 1" LENGTH="14 "/>
+   <textElement ID="I" KEY="003" ENTRY="Starte Level 2" LENGTH="14 "/>
+   <textElement ID="I" KEY="004" ENTRY="Starte Level 3" LENGTH="14 "/>
+   <textElement ID="I" KEY="005" ENTRY="Starte Level 4" LENGTH="14 "/>
+   <textElement ID="I" KEY="006" ENTRY="github.com" LENGTH="30 "/>
+   <textElement ID="I" KEY="007" ENTRY="Sorry, couldn´t open http://www.github.com." LENGTH="50 "/>
+   <textElement ID="I" KEY="008" ENTRY="Next mark a field ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="009" ENTRY="Sorry, you stepped on a mine!" LENGTH="50 "/>
+   <textElement ID="I" KEY="010" ENTRY="You cleared all possible fields, you win!" LENGTH="50 "/>
+   <textElement ID="I" KEY="011" ENTRY="Feld frei, nächstes Feld ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="012" ENTRY="Nothing marked, next step on field ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="013" ENTRY="Mark removed, next step on field ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="014" ENTRY="Mark set, next step on field ..." LENGTH="50 "/>
+   <textElement ID="I" KEY="015" ENTRY="Start, step on field." LENGTH="50 "/>
+   <textElement ID="I" KEY="016" ENTRY="       remaining fields :" LENGTH="25 "/>
+   <textElement ID="I" KEY="017" ENTRY="           mines hidden :" LENGTH="25 "/>
+   <textElement ID="I" KEY="018" ENTRY="            mines found :" LENGTH="25 "/>
   </language>
  </textPool>
  <programDocumentation/>
@@ -158,12 +195,12 @@ selection-screen:
 initialization.
 
 **setting up buttons
-  sscrfields-functxt_01 = &apos;Mark Mine&apos;.
-  sscrfields-functxt_02 = &apos;Start level 1&apos;.
-  sscrfields-functxt_03 = &apos;Start level 2&apos;.
-  sscrfields-functxt_04 = &apos;Start level 3&apos;.
-  sscrfields-functxt_05 = &apos;Start level 4&apos;.
-  link = &apos;github.com&apos;.
+  sscrfields-functxt_01 = &apos;mark mine&apos;(001).
+  sscrfields-functxt_02 = &apos;Start level 1&apos;(002).
+  sscrfields-functxt_03 = &apos;Start level 2&apos;(003).
+  sscrfields-functxt_04 = &apos;Start level 3&apos;(004).
+  sscrfields-functxt_05 = &apos;Start level 4&apos;(005).
+  link = &apos;github.com&apos;(006).
 
   bomb_n   = 10.
 
@@ -199,7 +236,7 @@ at selection-screen.
          exceptions
                 prog_not_found = 1.
       if sy-subrc &lt;&gt; 0.
-        msg0 = &apos;Sorry, couldn´t open http://www.github.com.&apos;.
+        msg0 = &apos;Sorry, couldn´t open http://www.github.com.&apos;(007).
       endif.
       exit.
   endcase.
@@ -220,7 +257,7 @@ start-of-selection.
 form check_field.
   if sscrfields-ucomm = &apos;FC01&apos;.        &quot; next time look for a mine
     status = stat_mark.
-    msg0 = &apos;Next mark a field ...&apos;.
+    msg0 = &apos;markiere ein Feld ...&apos;(008).
     exit.
   endif.
   perform open_field using sscrfields-ucomm.
@@ -243,18 +280,18 @@ form open_field using open.
   subtract 1 from rema_n.
   rema_cn = rema_n.
   if &lt;f&gt; = &apos;*&apos;.                        &quot; hit the mine
-    msg0 = &apos;Sorry, you stepped on a mine!&apos;.
+    msg0 = &apos;Sorry, you stepped on a mine!&apos;(009).
     status = stat_lost.
     exit.
   endif.
   if rema_n = bomb_n.
-    msg0 = &apos;You cleared all possible fields, you win!&apos;.
+    msg0 = &apos;You cleared all possible fields, you win!&apos;(010).
     status = stat_won.
   else.                                &quot; clear area and continue
     if &lt;f&gt; = &apos;0&apos;.
       perform auto_clear using i.
     endif.
-    msg0 = &apos;Field clear, next step on field ...&apos;.
+    msg0 = &apos;Field clear, next step on field ...&apos;(011).
   endif.
 endform. &quot; open_field
 
@@ -263,7 +300,7 @@ endform. &quot; open_field
 form mark_field.
   status = stat_open.                  &quot; next round open again.
   if sscrfields-ucomm = &apos;FC01&apos;.        &quot; dont mark
-    msg0 = &apos;Nothing marked, next step on field ...&apos;.
+    msg0 = &apos;Nothing marked, next step on field ...&apos;(012).
     exit.
   endif.
   assign (sscrfields-ucomm) to &lt;b&gt;.    &quot; assign button
@@ -271,7 +308,7 @@ form mark_field.
     &lt;b&gt; = space.                       &quot; so remove mark
     subtract 1 from fond_n.
     fond_cn = fond_n.
-    msg0 = &apos;Mark removed, next step on field ...&apos;.
+    msg0 = &apos;Mark removed, next step on field ...&apos;(013).
     exit.
   endif.
   if &lt;b&gt; &lt;&gt; space.                     &quot; button allready pushed
@@ -280,7 +317,7 @@ form mark_field.
   &lt;b&gt; = k_mark.                        &quot; mark this field
   add 1 to fond_n.
   fond_cn = fond_n.
-  msg0 = &apos;Mark set, next step on field ...&apos;.
+  msg0 = &apos;Mark set, next step on field ...&apos;(014).
 endform. &quot; mark_field
 
 
@@ -351,17 +388,17 @@ form init_play.
 
 **setting texts and scores
            &quot;  1234567890123456789012345
-  rema_txt = &apos;       remaining fields :&apos;.
+  rema_txt = &apos;       remaining fields :&apos;(016).
   rema_n   = 64.
   rema_cn  = rema_n.
-  bomb_txt = &apos;           mines hidden :&apos;.
+  bomb_txt = &apos;           mines hidden :&apos;(017).
 * bomb_n   = 10. &quot; number of bombs are set outside
   bomb_cn  = bomb_n.
-  fond_txt = &apos;            mines found :&apos;.
+  fond_txt = &apos;            mines found :&apos;(018).
   fond_n   = 0.
   fond_cn  = fond_n.
 
-  msg0 = &apos;Start, step on field.&apos;.
+  msg0 = &apos;Start, step on field.&apos;(015).
   status   = stat_open.
 
 endform. &quot; init_play.
